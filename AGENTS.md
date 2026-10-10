@@ -1,6 +1,7 @@
 # Coding standards
 
 - **Ruby and OOP work:** Whenever writing, refactoring, or reviewing Ruby code — or object-oriented code in any language — ALWAYS use the `sandi-metz-design` skill first and follow its rules (the Metz Rules, dependency management, message-based design). This applies to all work in Ruby codebases, not just when design questions come up. Pair with the `idiomatic-ruby-and-rails` skill for Ruby/Rails conventions, and the `clean-code-and-refactoring` skill for changeability heuristics.
+- **Go work:** use `sandi-metz-design` with `idiomatic-go`.
 
 ## Test-driven development
 
