@@ -1,8 +1,7 @@
 # agent-skills
 
-Portable agent skills + coding standards, packaged for OpenAI Codex (CLI and
-IDE extension), which supports the same `SKILL.md` agent-skills format as
-Claude Code.
+Portable agent skills + coding standards, packaged for Crush and Claude Code
+(both use the standard `SKILL.md` agent-skills format).
 
 ## Contents
 
@@ -15,7 +14,7 @@ Claude Code.
 | `skills/beautiful-code/` | Readable, well-shaped code (SOLID reference) |
 | `skills/tdd/` | Disciplined red-green-refactor loop with an observed-failure gate (ported from Test Double's MIT-licensed [han](https://github.com/testdouble/han) plugin — see `skills/tdd/LICENSE`) |
 | `AGENTS.md` | Global coding standards (TDD-first, testing rules, definition of done) |
-| `install.sh` | Symlinks everything into place for Codex |
+| `install.sh` | Symlinks everything into place for Crush and Claude Code |
 
 ## Install (work machine)
 
@@ -26,15 +25,14 @@ gh repo clone leopolicastro/agent-skills ~/software/agent-skills
 
 The script symlinks:
 
-- each `skills/<name>` → `~/.agents/skills/<name>` (Codex's personal skills
-  directory — discovered by both the CLI and the IDE extension)
-- `AGENTS.md` → `~/.codex/AGENTS.md` (Codex's global instructions), only if
-  you don't already have one; an existing file is never overwritten — merge
-  by hand instead.
+- each `skills/<name>` → `~/.agents/skills/<name>` (discovered by Crush)
+- each `skills/<name>` → `~/.claude/skills/<name>` (discovered by Claude Code)
+- `AGENTS.md` → `~/.claude/CLAUDE.md` (Claude Code's global instructions),
+  only if you don't already have one; an existing file is never overwritten,
+  so merge by hand instead.
 
-Then run `/skills` in Codex (or type `$` in the prompt) to confirm all six
-skills are listed. Skills also trigger implicitly when a task matches their
-description.
+Then run `/skills` in Claude Code, or check the skills list in Crush, to
+confirm all six skills are listed.
 
 ## Updating
 
@@ -48,12 +46,6 @@ Re-run `./install.sh` only if new skills were added (it's idempotent).
 
 ## Using with Crush
 
-Crush discovers `~/.agents/skills` by default, so `install.sh` is all that's
-needed. The Crush-specific config lives in
+Crush discovers `~/.agents/skills` by default. Its global instructions and
+other config live in
 [crush-config](https://github.com/leopolicastro/crush-config).
-
-## Using with Claude Code too
-
-The `skills/` directories are standard Claude Code skills. To make this repo
-the single source of truth on a machine running Claude Code, symlink them into
-`~/.claude/skills/` the same way.
