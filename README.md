@@ -19,8 +19,8 @@ Portable agent skills + coding standards, packaged for Crush and Claude Code
 ## Install (work machine)
 
 ```sh
-gh repo clone leopolicastro/agent-skills ~/software/agent-skills
-~/software/agent-skills/install.sh
+gh repo clone leopolicastro/agent-skills ~/Projects/agent-skills
+~/Projects/agent-skills/install.sh
 ```
 
 The script symlinks:
