@@ -5,7 +5,8 @@ description: >
   build a behavior test list, then drive each behavior through
   red-green-refactor with an enforced observed-failure gate. Use when the user
   wants to implement, build, or write code test-first, "do TDD", follow
-  "red-green-refactor", drive code from tests, or grow a feature
+  "red-green-refactor", drive code from tests, choose the next test by the
+  Transformation Priority Premise (TPP) or ZOMBIES ordering, or grow a feature
   behavior-by-behavior with tests leading. This skill writes and changes code;
   it does not produce a test plan document, review or audit existing code,
   restructure existing code outside a TDD loop, specify what a feature should
@@ -13,7 +14,7 @@ description: >
 ---
 
 > Ported from the `tdd` skill in Test Double's MIT-licensed
-> [han](https://github.com/testdouble/han) plugin suite (han-coding 2.3.0) —
+> [han](https://github.com/testdouble/han) plugin suite (han-coding 3.3.0) —
 > see [LICENSE](./LICENSE). Adapted to be self-contained and agent-agnostic.
 
 ## Constraints (read before anything else)
@@ -29,6 +30,13 @@ and override any instinct to move faster.
   code. The verbatim Three Laws and Canon TDD steps it derives from are in
   [references/tdd-loop.md](./references/tdd-loop.md); pull that reference when a
   step needs the canon or the implementation gears.
+- **The scope gate is the observed-failure gate's companion.** The
+  observed-failure gate proves a red is genuine. It does not prove the test
+  deserved to exist in this build. No production-code change outside the scope
+  boundary recorded in Step 1, and least of all in shared or cross-application
+  code other consumers depend on. A list item whose green requires an
+  out-of-scope edit is a stop, never an implement; Step 2 carries the
+  resolution ladder that Step 3 works.
 - **Two hats.** Never refactor while any test is red. See
   [references/tdd-loop.md](./references/tdd-loop.md) for the canonical statement.
 - **One behavior at a time.** Exactly one test list item becomes one runnable
@@ -75,14 +83,25 @@ until refactor surfaces a need.** These govern the green and refactor steps.
 If none exist, state that plainly and plan to infer conventions from the
 surrounding code instead.
 
+**Resolve the scope boundary.** Name, in files and directories, what this work
+is allowed to change, because the scope gate tests every candidate edit against
+it. Inside the boundary: the files, directories, or module the request names,
+plus the tests that cover them. Outside it: everything the named code merely
+reaches, meaning shared libraries, engines, packages, and any code a second
+application or consumer also uses, plus code another team owns per
+`CODEOWNERS`. When the request names no files, take the application or package
+the requested behavior lives in as the boundary and treat its dependencies as
+outside it. Record the boundary; you will test list items and production edits
+against it.
+
 **Report scope, then proceed (no gate).** This skill runs autonomously after
 the initial request: it does not stop for confirmation. State to the user, in a
 few lines: the behavior or feature to be built, **whether this is net-new
 behavior or a fix to existing broken behavior** (a reported bug, a failing
 case, a fix being driven back in after a root-cause investigation, or code
 that already exhibits the error — recognize the fix case from those signals,
-not only from the word "bug"), the resolved test/lint/build commands, the
-standards and ADRs found (or that none were), the current branch, and that the
+not only from the word "bug"), the scope boundary you just recorded, the
+resolved test/lint/build commands, the standards and ADRs found (or that none were), the current branch, and that the
 skill will now write code in a red-green-refactor loop. If the current branch
 is the repository's default branch (`main` or `master`), recommend working on
 a branch, but do not wait for an answer. This is a report the user reads while
@@ -96,11 +115,13 @@ in Step 2, present it together with this scope report, and wait for approval
 before starting the Step 3 loop. Absent an explicit request like that, the
 skill runs to completion without further human input.
 
-The one input that can still block is a missing test command: if it could not
-be resolved from the agent instructions, project docs, the discovery script,
-or manifest inference, ask the user for it, because TDD is impossible without
-a way to run tests. Exhaust inference before asking; this is a hard
-dependency, not a discretionary checkpoint.
+Two things can still block a run, both hard dependencies rather than
+discretionary checkpoints. A missing test command is the first: if it could
+not be resolved from the agent instructions, project docs, the discovery
+script, or manifest inference, ask the user for it, because TDD is impossible
+without a way to run tests. Exhaust inference before asking. The second is the
+top rung of the scope gate's resolution ladder in Step 2, reached only when
+the requested behavior cannot be delivered without an out-of-scope change.
 
 ## Step 2: Build the BDD Test List
 
@@ -125,7 +146,12 @@ specified desired behavior (raise on invalid input); it is wrong only when the
 raised error *is the bug being fixed*.
 
 Order the list outside-in by user value: the next item is the most important
-thing the system does not yet do. For an item that is **user-observable
+thing the system does not yet do. When one behavior expands into several
+candidate tests (the empty case, the single case, the many case, the
+boundaries), order those tests simplest-first — Zero → One → Many — so each
+test forces the smallest generalization of the code. The ranking behind that
+order is in [references/test-selection.md](./references/test-selection.md);
+pull it when the order is not obvious. For an item that is **user-observable
 behavior at a system boundary**, write the outer acceptance test for it *first*
 (it will be red until its inner behaviors exist) and record it as the outer
 loop for that item. For internal or utility behavior with no meaningful system
@@ -138,7 +164,41 @@ that breaks, a regulation, a real incident). Scenarios that fail the evidence
 test go to a deferred list with the trigger that would reopen them. Do not pad
 the list for symmetry or completeness.
 
-Report the test list to the user. Unless the verify-plan exception from Step 1
+**Then apply the scope gate to the list.** YAGNI asks whether a behavior has
+evidence it is needed. The scope gate asks a question no amount of evidence
+answers: would making this test pass require changing a file outside the Step 1
+boundary? Ask it of every item, and ask it hardest of items that arrived from a
+test plan, an analysis report, or an agent finding carrying a severity label. A
+CRIT or HIGH label is evidence the finding is real. It is never evidence the
+fix belongs to this ticket, and an item whose own text names a production
+change as a prerequisite ("this requires first adding an explicit `order`") is
+that production change wearing a test's clothes.
+
+**The resolution ladder.** Work it in order and stop at the first rung that
+resolves the item. Never skip to implementing the out-of-scope change.
+
+1. **Redesign the test.** Most items that trip the gate are asking production
+   code to supply something the test could arrange for itself. Rebuild the
+   setup so the assertion holds without the out-of-scope behavior, and the item
+   stays on the list in its rewritten form. A test that needs the out-of-scope
+   behavior only to make a fixture deterministic always resolves here: that is
+   a test-design problem, and leaning on a production change to make it
+   disappear is the wrong direction of dependence.
+2. **Defer the item as its own work.** When the test cannot be redesigned, move
+   it off the list and write it up as a ticket: the behavior, the file that
+   would have to change, who else consumes that file, and the change it needs.
+   Report it in Step 5 as work this build did not own. The finding stays alive;
+   it just stops being this build's job.
+3. **Escalate.** Only when the requested behavior cannot be delivered at all
+   without the out-of-scope change, stop and ask the user. Name the file, its
+   other consumers, the change it needs, and the two ways forward: widen this
+   build's scope to include it, or split it into separate work and drop the
+   dependent behavior from this build. This is the one rung that pauses an
+   otherwise autonomous run, and it is a hard dependency, not a review
+   checkpoint.
+
+Report the test list to the user, along with any item the scope gate moved and
+which rung resolved it. Unless the verify-plan exception from Step 1
 applies, continue to Step 3 immediately without waiting for approval. When that
 exception applies, present the test list together with the Step 1 scope report
 and wait for approval before entering the loop.
@@ -147,7 +207,15 @@ and wait for approval before entering the loop.
 
 Pick exactly one item from the list. Choose one that teaches you something and
 that you are confident you can implement in one cycle (Beck's "one step
-test"). Then run these three phases in order. Do not collapse them.
+test"). When several items qualify, prefer the one whose passing requires the
+simplest transformation of the code: a test needing only a constant return
+comes before one forcing a conditional, and a conditional before a loop — the
+Transformation Priority Premise, made concrete by the ZOMBIES ordering, both in
+[references/test-selection.md](./references/test-selection.md); pull that
+reference when the choice is not obvious. If every remaining item forces a big
+leap (a loop or recursion with no smaller test in between), a simpler test is
+missing: add it to the list and pick it. Then run these three phases in order.
+Do not collapse them.
 
 **Read once, don't reread.** Within a single loop iteration, do not reread a
 file you have already read in this iteration unless you have edited it. When
@@ -187,6 +255,15 @@ cross the item off and pick the next one. If the test is asserting the bug,
 **do not cross the item off** — rewrite it to assert the desired correct
 behavior, so it goes red until the fix lands. Do not write production code off
 an unobserved red.
+
+**With the red observed, check where green would land.** Name the files you
+would edit to make this test pass, before you edit any of them. If one sits
+outside the Step 1 boundary, the scope gate has tripped: do not edit it, and
+work the resolution ladder from Step 2 instead. A genuine red says the behavior
+is missing. It does not say this build owns producing it, and this is the only
+check that asks. Shared or cross-application code is where the gate matters
+most, because the blast radius of an edit there reaches consumers nobody in
+this build is testing.
 
 ### Green
 
@@ -264,6 +341,9 @@ Summarize for the user:
 
 - Behaviors implemented, and the state of the test list (done, and any
   deferred items with their reopen triggers).
+- Any item the scope gate moved, with the rung that resolved it: the redesign
+  that kept it, or the ticket write-up for the out-of-scope change this build
+  declined to make.
 - Which coding standards and ADRs were applied, and where they shaped the code.
 - Any YAGNI deferrals from refactor, each with its reopen trigger.
 - A scope warning if the test list exceeded roughly ten open items, with a
