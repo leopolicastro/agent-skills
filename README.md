@@ -12,6 +12,7 @@ Claude Code.
 | `skills/idiomatic-ruby-and-rails/` | Ruby/Rails conventions and idioms |
 | `skills/clean-code-and-refactoring/` | Changeability heuristics and a code-smells catalog |
 | `skills/prove-it-works/` | Failure-first, end-to-end proof that a change actually works |
+| `skills/beautiful-code/` | Readable, well-shaped code (SOLID reference) |
 | `skills/tdd/` | Disciplined red-green-refactor loop with an observed-failure gate (ported from Test Double's MIT-licensed [han](https://github.com/testdouble/han) plugin — see `skills/tdd/LICENSE`) |
 | `AGENTS.md` | Global coding standards (TDD-first, testing rules, definition of done) |
 | `install.sh` | Symlinks everything into place for Codex |
@@ -19,9 +20,8 @@ Claude Code.
 ## Install (work machine)
 
 ```sh
-git clone git@github.com:pandorocks/agent-skills.git
-cd agent-skills
-./install.sh
+gh repo clone leopolicastro/codex-agent-skills ~/software/agent-skills
+~/software/agent-skills/install.sh
 ```
 
 The script symlinks:
@@ -32,7 +32,7 @@ The script symlinks:
   you don't already have one; an existing file is never overwritten — merge
   by hand instead.
 
-Then run `/skills` in Codex (or type `$` in the prompt) to confirm all five
+Then run `/skills` in Codex (or type `$` in the prompt) to confirm all six
 skills are listed. Skills also trigger implicitly when a task matches their
 description.
 
@@ -45,6 +45,12 @@ git pull
 ```
 
 Re-run `./install.sh` only if new skills were added (it's idempotent).
+
+## Using with Crush
+
+Crush discovers `~/.agents/skills` by default, so `install.sh` is all that's
+needed. The Crush-specific config lives in
+[crush-config](https://github.com/leopolicastro/crush-config).
 
 ## Using with Claude Code too
 
