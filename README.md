@@ -20,7 +20,7 @@ Claude Code.
 ## Install (work machine)
 
 ```sh
-gh repo clone leopolicastro/codex-agent-skills ~/software/agent-skills
+gh repo clone leopolicastro/agent-skills ~/software/agent-skills
 ~/software/agent-skills/install.sh
 ```
 
