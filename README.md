@@ -11,6 +11,7 @@ Portable agent skills + coding standards, packaged for Crush and Claude Code
 | `skills/idiomatic-ruby-and-rails/` | Ruby/Rails conventions and idioms |
 | `skills/clean-code-and-refactoring/` | Changeability heuristics and a code-smells catalog |
 | `skills/prove-it-works/` | Failure-first, end-to-end proof that a change actually works |
+| `skills/refactor/` | Behavior-preserving cleanup of the last commit; hands off to `/beautiful-code` |
 | `skills/beautiful-code/` | Readable, well-shaped code (SOLID reference) |
 | `skills/tdd/` | Disciplined red-green-refactor loop with an observed-failure gate (ported from Test Double's MIT-licensed [han](https://github.com/testdouble/han) plugin — see `skills/tdd/LICENSE`) |
 | `AGENTS.md` | Global coding standards (TDD-first, testing rules, definition of done) |
@@ -32,7 +33,7 @@ The script symlinks:
   so merge by hand instead.
 
 Then run `/skills` in Claude Code, or check the skills list in Crush, to
-confirm all six skills are listed.
+confirm all seven skills are listed.
 
 ## Updating
 
