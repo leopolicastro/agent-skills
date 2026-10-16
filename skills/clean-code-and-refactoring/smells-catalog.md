@@ -73,6 +73,17 @@ A reach-for-it list of smells, grouped by severity, with a recommended refactori
 | Section dividers in long file (`# ----- USERS -----`) | 🟡 | The file should be split | Extract files/classes |
 | Mandatory javadoc-style on every method | 🟢 | Boilerplate; obscures intent | Document only public APIs |
 
+## Dead weight smells
+
+| Smell | Severity | Why it hurts | Move |
+|---|---|---|---|
+| Result computed and never used | 🟡 | Wasted work; readers assume it matters | Remove dead code |
+| Same value fetched or computed twice in one path | 🟡 | Wasted work; the two copies can drift | Extract variable; reuse it |
+| Unused import or dependency | 🟢 | Noise; slower loads and installs | Delete |
+| Parameter gets the same value at every call site (tests included) | 🟢 | Callers pass what the function could own | Remove parameter |
+| Variable that is only returned or passed straight on | 🟢 | One more name to track, for nothing | Inline variable — keep it if its name explains the expression |
+| Hand-rolled version of a built-in | 🟢 | More code to read and to get wrong | Substitute algorithm — unless the built-in version is harder to read |
+
 ## Test smells
 
 | Smell | Severity | Why it hurts | Move |
@@ -105,6 +116,11 @@ For each smell, the typical mechanical refactor:
 |---|---|
 | Extract Method | Long method; chunk has a name |
 | Inline Method | Method body as clear as its name |
+| Extract Variable | Same expression computed twice, or an expression that needs a name |
+| Inline Variable | Variable's name adds nothing the expression doesn't say |
+| Remove Dead Code | Code whose result is never used |
+| Remove Parameter | Same argument at every call site |
+| Substitute Algorithm | A built-in or simpler algorithm does the same job |
 | Rename | Better name found |
 | Move Method | Feature envy detected |
 | Extract Class | Cohesive cluster of methods |

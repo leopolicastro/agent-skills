@@ -1,6 +1,6 @@
 ---
 name: clean-code-and-refactoring
-description: Write code that other people (and future-you) can change cheaply. Use when authoring new code, reviewing a PR, smelling duplication or long methods, picking names, or deciding whether to refactor before adding a feature. Distills Clean Code (Martin), 99 Bottles of OOP (Metz), and Code Complete 2e (McConnell).
+description: Write code that other people (and future-you) can change cheaply. Use when authoring new code, reviewing a PR, smelling duplication or long methods, picking names, deciding whether to refactor before adding a feature, or when the user says code feels messy or asks to clean it up, simplify it, or make it nicer. Distills Clean Code (Martin), 99 Bottles of OOP (Metz), and Code Complete 2e (McConnell).
 ---
 
 # Clean Code & Refactoring
@@ -8,6 +8,10 @@ description: Write code that other people (and future-you) can change cheaply. U
 The single thesis: **the cost of code is the cost of changing it.** Clarity beats cleverness; small reversible steps beat big rewrites; tests are how you make refactors safe.
 
 ## Decision-time heuristics
+
+**The 60-second test**
+
+- Could an engineer new to this code say what a function does — without reading how it does it — in about a minute? If not, start there. A function should read like a sentence; a file like a chapter, high-level flow first.
 
 **Naming**
 
@@ -27,6 +31,15 @@ The single thesis: **the cost of code is the cost of changing it.** Clarity beat
 
 - A comment is a failure to express intent in code. Most "what" comments should become better names. Keep "why" comments — context the code can't carry (regulatory reason, performance trick, surprising bug).
 - Never check in commented-out code. `git` remembers.
+
+**Subtract first**
+
+- Prefer deletion over addition. The best refactor often removes code rather than reorganizing it.
+- Unnecessary work: a call or computation whose result is never used; the same thing fetched, computed, or built twice when once would do.
+- Dead weight: unused imports and dependencies; a parameter that gets the same value at every call site, counting the tests as call sites (remove it and let the function own the value).
+- A variable that is only returned or passed straight on: inline it — unless its name explains something the expression doesn't (Clean Code's *explanatory variable*).
+- A hand-rolled block that a built-in already does: use the built-in — unless the shorter version takes study to read (99 Bottles' *Incomprehensibly Concise*).
+- A method, class, or wrapper that only forwards, adding indirection but no meaning: inline it.
 
 **Refactoring discipline**
 
@@ -61,6 +74,8 @@ The single thesis: **the cost of code is the cost of changing it.** Clarity beat
 - About to name something (variable, function, class, file).
 - See duplication, a 200-line function, or a method with 5+ args.
 - Choosing between "fix it now" vs. "refactor first."
+- The user says the code feels messy, or asks to clean it up, simplify it, or make it nicer.
+- Running a `/refactor` pass — its checklists live here.
 
 ## Anti-heuristics (common mistakes)
 
@@ -68,5 +83,7 @@ The single thesis: **the cost of code is the cost of changing it.** Clarity beat
 - "Clean = lots of small classes." Smallness is a side effect, not a goal. Small classes that hide nothing are noise.
 - Over-applying SOLID. SRP, OCP, LSP, ISP, DIP are guides, not laws. Apply when you feel the corresponding pain.
 - Treating tests as an afterthought to clean up later. Tests *enable* refactoring; without them you're frozen.
+- Polishing everything to the same standard. A 10-line script doesn't need the treatment a core service does; calibrate the effort to what the code is.
+- Inventing changes. If the code is already clear, say so and leave it.
 
 See `lessons.md` for the long-form lessons and chapter-by-chapter highlights from the four sources.

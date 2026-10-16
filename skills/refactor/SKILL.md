@@ -1,52 +1,50 @@
 ---
 name: refactor
-description: Refactor committed, verified code to remove unnecessary work, reduce complexity, and improve clarity — without changing behavior. Use when the user says "refactor", "clean this up", "simplify", or "trim the fat" after confirming changes work.
+description: Run a behavior-preserving cleanup pass over committed, verified code — first remove what isn't needed, then make what's left read well — with the test suite green before and after. Use when the user says "refactor", "clean this up", "simplify", or "trim the fat" after confirming changes work.
 disable-model-invocation: true
-allowed-tools: Read, Glob, Edit, Bash(git diff *)
+allowed-tools: Read, Glob, Grep, Edit, Bash(git diff *)
 ---
 
-This skill runs after code has been committed and manually verified. The goal is to make the code better without changing what it does.
+This skill runs after code has been committed and verified. The goal is to make the code better without changing what it does: first take out what isn't needed, then make what's left read well.
+
+The heuristics for both passes live in the `clean-code-and-refactoring` skill. Load it before you start: this skill is the procedure, that one is the checklist.
 
 ## Read the recent work
 
 !`git diff HEAD~1 --name-only`
 !`git diff HEAD~1`
 
-Read each changed file in full before touching anything.
+Read each changed file in full before touching anything. Understand the intent before changing the shape.
 
-## Refactor checklist
+## Get to green first
 
-Work through each file and ask:
+Resolve the test command the way the `tdd` skill does: the project's agent instructions (`AGENTS.md`, `CLAUDE.md`) and docs, then the `tdd` skill's `scripts/detect-tdd-context.sh`, and only then ask the user. Run the full suite and paste its summary line. It must be green before any edit. A red suite means stop and report; never refactor on red.
 
-**Unnecessary work**
-- Are there calls, computations, or transformations whose result is never used?
-- Is anything being fetched, calculated, or instantiated more than once when once would do?
-- Are there variables that exist only to immediately be returned or passed?
+If a changed file has no test that exercises it, leave that file alone and say so. Offer to write characterization tests first; refactoring untested code is guessing.
 
-**Complexity**
-- Can any block be replaced with a simpler built-in or a single expression?
-- Are there nested conditions that could be flattened or early-returned?
-- Are there abstractions that add indirection without adding clarity?
+## Pass 1: Subtract
 
-**Dead weight**
-- Commented-out code with no explanatory value — remove it
-- Imports or dependencies that are no longer used — remove them
-- Parameters that are always the same value at every call site — consider eliminating
+Work the **Subtract first** section of `clean-code-and-refactoring`: results never used, work done twice, unused imports and dependencies, parameters that never vary, variables and layers that only forward, hand-rolled built-ins. Delete before you reorganize.
 
-**Naming and structure**
-- Does the name of each function, variable, or file describe what it actually does?
-- Are there functions doing more than one thing that would be clearer split apart?
-- Are there functions doing one small thing that would be clearer inlined?
+## Pass 2: Read it like prose
+
+Apply the **60-second test**, then the **Naming**, **Functions**, and **Comments** heuristics. Use `smells-catalog.md` to find the move that fits a smell. Heed the anti-heuristics: don't merge code that only coincidentally looks alike, and don't add abstraction for a case that doesn't exist yet.
+
+Write idiomatic code for the language — clean Ruby doesn't look like clean Go. Load the language's idiom skill (`idiomatic-ruby-and-rails`, `idiomatic-go`) when one is installed, and `sandi-metz-design` when class or module structure is in question.
 
 ## Ground rules
 
-- **No behavior changes.** If a refactor would change what the code does, note it as a suggestion instead and move on.
-- **If it's already good, say so.** Not every file needs changes. If the best version is the current version, state that clearly.
-- **One file at a time.** Make changes, then review before moving to the next file.
-- **Prefer deletion over addition.** The best refactor is often removing code, not reorganizing it.
+- **No behavior changes.** If an improvement would change what the code does, note it as a suggestion and move on.
+- **Green to green, one file at a time.** Finish both passes on a file, re-run the suite, and paste the summary line before moving to the next. If a change turns a test red, revert it; don't patch forward.
+- **If it's already good, say so.** Not every file needs changes. Don't invent them.
+- **Proportional effort.** A 10-line script doesn't need the treatment a core service does.
+- **Refactor only.** Leave committing to the user. Everything this pass changes should fit in one refactor commit, separate from any behavior change.
 
 ## When done
 
-Summarize what was changed and why in plain language — one line per file touched.
+Summarize in plain language:
 
-Then invoke `/beautiful-code`.
+- One line per file touched: what changed and why.
+- Files left alone, and why: already good, or no test covered them.
+- Behavior changes and structural ideas you noted but didn't make.
+- The test suite's summary line before and after.
